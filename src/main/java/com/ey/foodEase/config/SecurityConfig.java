@@ -42,10 +42,12 @@ public class SecurityConfig {
             	.requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/owner/**").hasRole("OWNER")
-                .requestMatchers("/api/orders/**").hasAnyRole("OWNER", "CUSTOMER")
+                .requestMatchers("/api/orders/**").hasAnyRole("OWNER", "CUSTOMER", "ADMIN")
                 .requestMatchers("/api/delivery/**").hasAnyRole("DELIVERY", "CUSTOMER")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/payment/**").hasRole("CUSTOMER")
+                .requestMatchers("/api/restaurants/**").hasAnyRole("CUSTOMER", "OWNER", "ADMIN")
+                .requestMatchers("/api/user/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/menu-items/restaurant/**").hasAnyRole("OWNER", "CUSTOMER")
                 
                 .anyRequest().authenticated()

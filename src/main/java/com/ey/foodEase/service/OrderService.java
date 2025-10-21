@@ -320,5 +320,12 @@ public class OrderService {
 		order.setStatus(OrderStatus.DELIVERED); 
 		orderRepo.save(order);
 	}
+	
+	public List<OrderResponse> getAllOrders() {
+	    List<Order> orders = orderRepo.findAll();
+	    return orders.stream()
+	                 .map(this::mapToResponse)
+	                 .collect(Collectors.toList());
+	}
 
 }

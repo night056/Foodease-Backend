@@ -1,6 +1,7 @@
 package com.ey.foodEase.controller;
 
 import com.ey.foodEase.model.User;
+import com.ey.foodEase.response.dto.UserResponse;
 import com.ey.foodEase.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +26,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all")
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public List<UserResponse> getAllUsers() {
+        return userService.getAllUsers(); 
     }
 }

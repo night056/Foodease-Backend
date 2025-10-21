@@ -161,5 +161,12 @@ public class OrderController {
             @RequestHeader("Authorization") String authHeader) {
         return ResponseEntity.ok(orderService.getOrdersByRestaurant(restaurantId));
     }
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<OrderResponse>> getAllOrdersForAdmin() {
+        return ResponseEntity.ok(orderService.getAllOrders());
+    }
+
 
 }
