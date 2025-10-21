@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ey.foodEase.model.Restaurant;
-import com.ey.foodEase.request.RestaurantRequest;
-import com.ey.foodEase.request.RestaurantResponse;
+import com.ey.foodEase.request.dto.RestaurantRequest;
+import com.ey.foodEase.request.dto.RestaurantResponse;
 import com.ey.foodEase.service.RestaurantService;
 
 @RestController

@@ -21,11 +21,13 @@ import com.ey.foodEase.repository.MenuItemRepository;
 import com.ey.foodEase.repository.OrderItemRepository;
 import com.ey.foodEase.repository.OrderRepository;
 import com.ey.foodEase.repository.RestaurantRepository;
-import com.ey.foodEase.request.OrderItemRequest;
-import com.ey.foodEase.request.OrderRequest;
-import com.ey.foodEase.response.OrderItemResponse;
-import com.ey.foodEase.response.OrderResponse;
+import com.ey.foodEase.request.dto.OrderItemRequest;
+import com.ey.foodEase.request.dto.OrderRequest;
+import com.ey.foodEase.response.dto.OrderItemResponse;
+import com.ey.foodEase.response.dto.OrderResponse;
 import com.ey.foodEase.util.JwtUtil;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class OrderService {
@@ -35,7 +37,7 @@ public class OrderService {
 
 	@Autowired
 	private OrderItemRepository itemRepo;
-	
+
 	@Autowired
 	private MenuItemRepository menuItemRepo;
 
@@ -208,18 +210,16 @@ public class OrderService {
 	}
 
 	private BigDecimal fetchPrice(Long menuItemId) {
-	    return menuItemRepo.findById(menuItemId)
-	            .map(MenuItem::getPrice)
-	            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu item not found"));
+		return menuItemRepo.findById(menuItemId).map(MenuItem::getPrice)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu item not found"));
 	}
 
 	private String fetchMenuItemName(Long menuItemId) {
-	    return menuItemRepo.findById(menuItemId)
-	            .map(MenuItem::getName)
-	            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu item not found"));
+		return menuItemRepo.findById(menuItemId).map(MenuItem::getName)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu item not found"));
 	}
 
-	private OrderResponse mapToResponse(Order order) {
+	public OrderResponse mapToResponse(Order order) {
 		List<OrderItemResponse> itemDTOs = order.getItems().stream().map(i -> {
 			OrderItemResponse dto = new OrderItemResponse();
 			dto.setMenuItemId(i.getMenuItemId());
@@ -260,12 +260,6 @@ public class OrderService {
 		Restaurant restaurant = restaurantRepo.findById(order.getRestaurantId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Restaurant not found"));
 
-		System.out.println("Approving Order:");
-		System.out.println("Order ID: " + orderId);
-		System.out.println("Restaurant ID: " + restaurant.getId());
-		System.out.println("Owner ID from token: " + ownerId);
-		System.out.println("Owner ID from code: " + restaurant.getOwner());
-
 		if (!Long.valueOf(restaurant.getOwner().getId()).equals(ownerId)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to approve this order");
 		}
@@ -279,16 +273,52 @@ public class OrderService {
 	}
 
 	public List<OrderResponse> getPendingOrdersForOwner(Long ownerId) {
-
 		List<Restaurant> restaurants = restaurantRepo.findByOwnerId(ownerId);
-
 		List<Long> restaurantIds = restaurants.stream().map(Restaurant::getId).collect(Collectors.toList());
-
 		List<Order> pendingOrders = orderRepo.findByRestaurantIdInAndStatus(restaurantIds, OrderStatus.PENDING);
-
 		return pendingOrders.stream().map(this::mapToResponse).collect(Collectors.toList());
 	}
+
+	public OrderResponse getOrderById(Long orderId, String token) {
+		Long userId = jwtUtil.extractUserId(token);
+		List<String> roles = (List<String>) jwtUtil.getAllClaimsFromToken(token).get("roles");
+		Order order = orderRepo.findById(orderId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+		if (roles.contains("CUSTOMER") && !order.getCustomerId().equals(userId)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to view this order");
+		}
+		if (roles.contains("OWNER")) {
+			Restaurant restaurant = restaurantRepo.findById(order.getRestaurantId())
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Restaurant not found"));
+
+			if (!Long.valueOf(restaurant.getOwner().getId()).equals(userId)) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to view this order");
+			}
+		}
+		return mapToResponse(order);
+	}
 	
-	
+	@Transactional
+	public void assignOrderForDelivery(Long orderId, String token) {
+		Long ownerId = jwtUtil.extractUserId(token);
+
+		Order order = orderRepo.findById(orderId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+
+		Restaurant restaurant = restaurantRepo.findById(order.getRestaurantId())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Restaurant not found"));
+
+		if (!Long.valueOf(restaurant.getOwner().getId()).equals(ownerId)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to assign this order");
+		}
+
+		if (order.getStatus() != OrderStatus.CONFIRMED) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Only confirmed orders can be assigned for delivery");
+		}
+
+		order.setStatus(OrderStatus.DELIVERED); 
+		orderRepo.save(order);
+	}
 
 }

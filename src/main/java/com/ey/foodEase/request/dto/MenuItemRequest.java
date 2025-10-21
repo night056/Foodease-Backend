@@ -1,4 +1,4 @@
-package com.ey.foodEase.request;
+package com.ey.foodEase.request.dto;
 
 import java.math.BigDecimal;
 

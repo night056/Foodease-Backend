@@ -42,7 +42,8 @@ public class SecurityConfig {
             	.requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/owner/**").hasRole("OWNER")
-                .requestMatchers("/api/delivery/**").hasRole("DELIVERY")
+                .requestMatchers("/api/orders/**").hasAnyRole("OWNER", "CUSTOMER")
+                .requestMatchers("/api/delivery/**").hasAnyRole("DELIVERY", "CUSTOMER")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/menu-items/restaurant/**").hasAnyRole("OWNER", "CUSTOMER")
                 

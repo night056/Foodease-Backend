@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ey.foodEase.model.Order;
 import com.ey.foodEase.repository.RestaurantRepository;
-import com.ey.foodEase.request.OrderItemRequest;
-import com.ey.foodEase.request.OrderRequest;
-import com.ey.foodEase.response.OrderResponse;
+import com.ey.foodEase.request.dto.OrderItemRequest;
+import com.ey.foodEase.request.dto.OrderRequest;
+import com.ey.foodEase.response.dto.OrderResponse;
+import com.ey.foodEase.service.DeliveryService;
 import com.ey.foodEase.service.OrderService;
 import com.ey.foodEase.util.JwtUtil;
 
@@ -33,6 +33,9 @@ public class OrderController {
     
     @Autowired
     private RestaurantRepository restaurantRepo;
+    
+    @Autowired
+    private DeliveryService deliveryService;
     
     @Autowired
     private JwtUtil jwtUtil;
@@ -130,4 +133,33 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getPendingOrdersForOwner(ownerId));
     }
     
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponse> getOrderById(
+            @PathVariable Long orderId,
+            @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(orderService.getOrderById(orderId, token));
+    }
+    
+    @PreAuthorize("hasRole('OWNER')")
+    @PostMapping("/deliveries/assign/{orderId}")
+    public ResponseEntity<?> assignOrderForDelivery(
+            @PathVariable Long orderId,
+            @RequestHeader("Authorization") String authHeader) {
+        
+        String token = authHeader.replace("Bearer ", "");
+        orderService.assignOrderForDelivery(orderId, token); 
+        deliveryService.makeDeliveryAvailable(orderId);         
+        return ResponseEntity.ok("Order is now available for delivery partners to accept.");
+    }
+    
+    @PreAuthorize("hasRole('OWNER')")
+    @GetMapping("/owner/restaurant/{restaurantId}/orders")
+    public ResponseEntity<List<OrderResponse>> getOrdersByRestaurant(
+            @PathVariable Long restaurantId,
+            @RequestHeader("Authorization") String authHeader) {
+        return ResponseEntity.ok(orderService.getOrdersByRestaurant(restaurantId));
+    }
+
 }

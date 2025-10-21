@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ey.foodEase.model.User;
 import com.ey.foodEase.repository.UserRepository;
-import com.ey.foodEase.request.LoginRequest;
-import com.ey.foodEase.request.RegisterRequest;
+import com.ey.foodEase.request.dto.LoginRequest;
+import com.ey.foodEase.request.dto.RegisterRequest;
 import com.ey.foodEase.service.AuthService;
 
 @RestController

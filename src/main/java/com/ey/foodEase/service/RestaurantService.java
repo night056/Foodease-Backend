@@ -4,8 +4,8 @@ import com.ey.foodEase.model.Restaurant;
 import com.ey.foodEase.model.User;
 import com.ey.foodEase.repository.RestaurantRepository;
 import com.ey.foodEase.repository.UserRepository;
-import com.ey.foodEase.request.RestaurantRequest;
-import com.ey.foodEase.request.RestaurantResponse;
+import com.ey.foodEase.request.dto.RestaurantRequest;
+import com.ey.foodEase.request.dto.RestaurantResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

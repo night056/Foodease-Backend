@@ -12,8 +12,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.ey.foodEase.model.Role;
 import com.ey.foodEase.model.User;
 import com.ey.foodEase.repository.UserRepository;
-import com.ey.foodEase.request.LoginRequest;
-import com.ey.foodEase.request.RegisterRequest;
+import com.ey.foodEase.request.dto.LoginRequest;
+import com.ey.foodEase.request.dto.RegisterRequest;
 import com.ey.foodEase.util.JwtUtil;
 
 @Service

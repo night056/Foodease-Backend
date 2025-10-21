@@ -1,4 +1,4 @@
-package com.ey.foodEase.response;
+package com.ey.foodEase.response.dto;
 
 import java.util.Set;
 

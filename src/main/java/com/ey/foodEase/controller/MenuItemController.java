@@ -1,7 +1,7 @@
 package com.ey.foodEase.controller;
 
-import com.ey.foodEase.request.MenuItemRequest;
-import com.ey.foodEase.response.MenuItemResponse;
+import com.ey.foodEase.request.dto.MenuItemRequest;
+import com.ey.foodEase.response.dto.MenuItemResponse;
 import com.ey.foodEase.service.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
