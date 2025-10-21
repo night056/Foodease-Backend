@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/orders/**").hasAnyRole("OWNER", "CUSTOMER")
                 .requestMatchers("/api/delivery/**").hasAnyRole("DELIVERY", "CUSTOMER")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/payment/**").hasRole("CUSTOMER")
                 .requestMatchers(HttpMethod.GET, "/api/menu-items/restaurant/**").hasAnyRole("OWNER", "CUSTOMER")
                 
                 .anyRequest().authenticated()

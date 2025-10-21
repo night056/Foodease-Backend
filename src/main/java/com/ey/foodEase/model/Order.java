@@ -32,9 +32,12 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items = new ArrayList<>();
+    
+    @Enumerated(EnumType.STRING)
+    private PaymentMode paymentMode;
 
 	public Order(Long id, Long customerId, Long restaurantId, OrderStatus status, LocalDateTime date,
-			BigDecimal totalAmt, List<OrderItem> items) {
+			BigDecimal totalAmt, List<OrderItem> items, PaymentMode paymentMode) {
 		super();
 		this.id = id;
 		this.customerId = customerId;
@@ -43,6 +46,7 @@ public class Order {
 		this.date = date;
 		this.totalAmt = totalAmt;
 		this.items = items;
+		this.paymentMode = paymentMode;
 	}
 
 	public Order() {
@@ -105,6 +109,23 @@ public class Order {
 	public void setItems(List<OrderItem> items) {
 		this.items = items;
 	}
+
+	public PaymentMode getPaymentMode() {
+		return paymentMode;
+	}
+
+	public void setPaymentMode(PaymentMode paymentMode) {
+		this.paymentMode = paymentMode;
+	}
+
+	@Override
+	public String toString() {
+		return "Order [id=" + id + ", customerId=" + customerId + ", restaurantId=" + restaurantId + ", status="
+				+ status + ", date=" + date + ", totalAmt=" + totalAmt + ", items=" + items + ", paymentMode="
+				+ paymentMode + "]";
+	}
+
+	
 
     
 }
