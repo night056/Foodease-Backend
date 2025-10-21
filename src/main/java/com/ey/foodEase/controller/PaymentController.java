@@ -21,7 +21,7 @@ public class PaymentController {
     @Autowired
     private OrderRepository orderRepo;
 
-    //@PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/pay/{orderId}")
     public ResponseEntity<String> Payment(@PathVariable Long orderId,
                                               @RequestParam PaymentMode mode) {
