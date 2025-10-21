@@ -2,15 +2,17 @@ package com.ey.foodEase.service;
 
 import com.ey.foodEase.model.Restaurant;
 import com.ey.foodEase.model.User;
+import com.ey.foodEase.model.Rating;
 import com.ey.foodEase.repository.RestaurantRepository;
 import com.ey.foodEase.repository.UserRepository;
+import com.ey.foodEase.repository.RatingRepository;
 import com.ey.foodEase.request.dto.RestaurantRequest;
 import com.ey.foodEase.request.dto.RestaurantResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,6 +25,9 @@ public class RestaurantService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RatingRepository ratingRepository;
 
     public RestaurantResponse addRestaurant(RestaurantRequest request) {
         Optional<User> optionalOwner = userRepository.findById(Long.valueOf(request.getOwnerId()));
@@ -73,9 +78,28 @@ public class RestaurantService {
                 restaurant.getOwner().getId()
         );
     }
-    
+
     public Restaurant getRestaurantById(Long id) {
         return restaurantRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found with ID: " + id));
+    }
+
+    // ✅ New method to add rating
+    public void addRating(Long restaurantId, int score, String username) {
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Rating rating = new Rating();
+        rating.setScore(score);
+        rating.setRestaurant(restaurant);
+        rating.setUser(user);
+        ratingRepository.save(rating);
+
+        // Recalculate average rating
+        List<Rating> allRatings = ratingRepository.findByRestaurantId(restaurantId);
+        double avg = allRatings.stream().mapToInt(Rating::getScore).average().orElse(0.0);
+        restaurant.setRating(BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP));
+        restaurantRepository.save(restaurant);
     }
 }
